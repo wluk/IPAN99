@@ -8,28 +8,27 @@ namespace ConsoleApplication1
 {
     class Program
     {
-        private static double dMin = -1;    //minimalna długość boku
-        private static double dMax = 66;    //maksymalna długość boku
+        private static double _dMin = -1;    //minimalna długość boku
+        private static double _dMax = 66;    //maksymalna długość boku
 
         static void Main(string[] args)
         {
-            int[,] krzywa = new int[6, 2];         // tablica do przechowywania punktów
+            int[,] krzywa = new int[7, 2];         // tablica do przechowywania punktów
             Stopwatch timer = new Stopwatch(); // obiekt do sprawdzania czasu
-
             krzywa[0, 0] = 0;  //x1
             krzywa[0, 1] = 0;  //y1
-            krzywa[1, 0] = 0;  //x2
-            krzywa[1, 1] = 4;  //y2
-            krzywa[2, 0] = 4;  //x3
-            krzywa[2, 1] = 10;  //y3
-            krzywa[3, 0] = 1;     //x4
+            krzywa[1, 0] = 1;  //x2
+            krzywa[1, 1] = 1;  //y2
+            krzywa[2, 0] = 2;  //x3
+            krzywa[2, 1] = 2;  //y3
+            krzywa[3, 0] = 3;     //x4
             krzywa[3, 1] = 3;     //y4
-            krzywa[4, 0] = 3;     //x5
-            krzywa[4, 1] = 10;     //y5
+            krzywa[4, 0] = 4;     //x5
+            krzywa[4, 1] = 4;     //y5
             krzywa[5, 0] = 5;     //x6
-            krzywa[5, 1] = 15;     //y6
-            //krzywa[6, 0] = 3;
-            //krzywa[6, 1] = 10;
+            krzywa[5, 1] = 5;     //y6
+            krzywa[6, 0] = 6;
+            krzywa[6, 1] = 6;
 
             Console.WriteLine("Algorytm IPAN99 - obliczania na watkach");
             Console.WriteLine();
@@ -42,7 +41,6 @@ namespace ConsoleApplication1
 
             switch (select)
             {
-
                 case 1:
                     timer.Start();
                     Oblicz(krzywa, 1);
@@ -52,14 +50,16 @@ namespace ConsoleApplication1
                 case 2:
                     Console.WriteLine("Wybrałeś opcje wielowątkowa podaj na ilu wątkach chcesz dokodonać obliczeń");
                     Console.Write("Podaj ilość wątków: ");
-                    int watek = int.Parse(Console.ReadLine());
+                    int liczbaWatkow = int.Parse(Console.ReadLine());
 
                     timer.Start();
-                    Oblicz(krzywa, watek);
+                    Oblicz(krzywa, liczbaWatkow);
                     timer.Stop();
 
                     break;
             }
+
+            Console.WriteLine("Czas obliczania: {0}ms", timer.ElapsedMilliseconds);
             Console.ReadKey();
 
         }
@@ -80,24 +80,23 @@ namespace ConsoleApplication1
             {
                 trojkiPunktow.Add(new TrojkaPunktow()
                 {
-                    punktPoprzedni = new Punkt()
+                    PunktPoprzedni = new Punkt()
                     {
-                        x = krzywa[a - 1, 0],
-                        y = krzywa[a - 1, 1]
+                        X = krzywa[a - 1, 0],
+                        Y = krzywa[a - 1, 1]
                     },
-                    punktSrodkowy = new Punkt()
+                    PunktSrodkowy = new Punkt()
                     {
-                        x = krzywa[a, 0],
-                        y = krzywa[a, 1]
+                        X = krzywa[a, 0],
+                        Y = krzywa[a, 1]
                     },
-                    punktNastepny = new Punkt()
+                    PunktNastepny = new Punkt()
                     {
-                        x = krzywa[a + 1, 0],
-                        y = krzywa[a + 1, 1]
+                        X = krzywa[a + 1, 0],
+                        Y = krzywa[a + 1, 1]
                     }
                 });
-            };
-
+            }
             //OBLICZENIE ILOŚCI DANYCH NA WĄTEK
             int ilosc = trojkiPunktow.Count / liczbaWatkow;
             if (trojkiPunktow.Count % 2 != 0)
@@ -106,36 +105,31 @@ namespace ConsoleApplication1
             }
 
             //PRZYGOTOWANIE ZESTAWOW DANYCH DLA WĄTKÓW
-            //lista na tablicę
-            var tymczasowaTabelaTrojekPunktow = trojkiPunktow.ToArray();
-            List<TrojkaPunktow[]> zbiorZestawowWatka = new List<TrojkaPunktow[]>();
-            for (int i = 0; i < krzywa.GetLength(0); i++)
+            var zbiorZestawowWatka = new List<List<TrojkaPunktow>>();
+            var zestaw = new List<TrojkaPunktow>();
+            foreach (var trojka in trojkiPunktow)
             {
-                if (i % ilosc == 0)
+                zestaw.Add(trojka);
+                if (zestaw.Count == ilosc || trojka == trojkiPunktow.Last())
                 {
-                    TrojkaPunktow[] zestawWatka = new TrojkaPunktow[ilosc];
-                    for (int j = i; j < i + ilosc; j++)
-                    {
-                        if (j < tymczasowaTabelaTrojekPunktow.Length)
-                        {
-                            zestawWatka[j - i] = tymczasowaTabelaTrojekPunktow[j];
-                        }
-                    }
-                    zbiorZestawowWatka.Add(zestawWatka);
+                    zbiorZestawowWatka.Add(zestaw);
+                    zestaw = new List<TrojkaPunktow>();
                 }
             }
 
             //WĄTKI
-            List<double> wszystkieAlfy = new List<double>();
-            List<Thread> wszystkieWatki = new List<Thread>();
-            object alfa = null;
+            var wszystkieAlfy = new List<double>();
+            var wszystkieWatki = new List<Thread>();
+
             foreach (var daneDlaWatka in zbiorZestawowWatka)
             {
                 var thread = new Thread(
                   () =>
                   {
-                      alfa = ZadanieWatka(daneDlaWatka);
+                      wszystkieAlfy.AddRange(ZadanieWatka(daneDlaWatka));
+                      
                   });
+                thread.IsBackground = true;
                 thread.Start();
 
                 wszystkieWatki.Add(thread);
@@ -145,7 +139,7 @@ namespace ConsoleApplication1
             foreach (var watek in wszystkieWatki)
             {
                 watek.Join();
-                wszystkieAlfy.AddRange((List<double>)alfa);
+                //wszystkieAlfy.AddRange((List<double>)alfa);
             }
 
             Console.WriteLine(wszystkieAlfy.Max());
@@ -154,15 +148,15 @@ namespace ConsoleApplication1
         /// <summary>
         /// Zadanie wykonywane przez wątek
         /// </summary>
-        /// <param name="dane">Zestaw danych</param>
+        /// <param name="zestawDanych">Zestaw danych</param>
         /// <returns>Zwraca alfy obliczone dla zestawu danych</returns>
-        private static List<double> ZadanieWatka(TrojkaPunktow[] dane)
+        private static List<double> ZadanieWatka(List<TrojkaPunktow> zestawDanych)
         {
-            List<double> alfyWatka = new List<double>();
+            var alfyWatka = new List<double>();
 
-            for (int i = 0; i < dane.GetLength(0); i++)
+            foreach (var trojka in zestawDanych)
             {
-                var alfa = Kat(dane[i].punktPoprzedni, dane[i].punktSrodkowy, dane[i].punktNastepny);
+                var alfa = Kat(trojka.PunktPoprzedni, trojka.PunktSrodkowy, trojka.PunktNastepny);
                 alfyWatka.Add(alfa);
             }
 
@@ -179,19 +173,19 @@ namespace ConsoleApplication1
         private static double Kat(Punkt punktPoprzedni, Punkt punktSrodkowy, Punkt punktNastepny)
         {
             double dlugoscOdcinka1 = DlugoscOdcinka(punktPoprzedni, punktSrodkowy);
-            if (CzyOdpowiedniOdcinek(dlugoscOdcinka1))
+            if (!CzyOdpowiedniOdcinek(dlugoscOdcinka1))
             {
                 return 0;
             }
 
             double dlugoscOdcinka2 = DlugoscOdcinka(punktSrodkowy, punktNastepny);
-            if (CzyOdpowiedniOdcinek(dlugoscOdcinka2))
+            if (!CzyOdpowiedniOdcinek(dlugoscOdcinka2))
             {
                 return 0;
             }
 
             double dlugoscOdcinka3 = DlugoscOdcinka(punktPoprzedni, punktNastepny);
-            if (CzyOdpowiedniOdcinek(dlugoscOdcinka3))
+            if (!CzyOdpowiedniOdcinek(dlugoscOdcinka3))
             {
                 return 0;
             }
@@ -211,46 +205,46 @@ namespace ConsoleApplication1
         /// <param name="dlugoscOdcinka"></param>
         private static bool CzyOdpowiedniOdcinek(double dlugoscOdcinka)
         {
-            bool relacja = false;
-            if (dlugoscOdcinka > dMax)
+            bool odpowiedni = true;
+            if (dlugoscOdcinka > _dMax)
             {
                 Console.WriteLine("Długość odcinka jest większa od wartości maksymalnej");
-                relacja = true;
+                odpowiedni = false;
             }
 
-            if (dlugoscOdcinka < dMin)
+            if (dlugoscOdcinka < _dMin)
             {
                 Console.WriteLine("Długość odcinka jest mniejsza od wartości minimalnej");
-                relacja = true;
+                odpowiedni = false;
             }
 
-            return relacja;
+            return odpowiedni;
         }
 
         /// <summary>
         /// Obliczenie długości odcinka za pomocą współrzednych
         /// </summary>
-        /// <param name="A">punkt A</param>
-        /// <param name="B">punkt B</param>
+        /// <param name="a">punkt A</param>
+        /// <param name="b">punkt B</param>
         /// <returns>Długość odcinka AB</returns>
-        private static double DlugoscOdcinka(Punkt A, Punkt B)
+        private static double DlugoscOdcinka(Punkt a, Punkt b)
         {
-            double X = Math.Pow((B.x - A.x), 2);
-            double Y = Math.Pow((B.y - A.y), 2);
-            return Math.Sqrt(X + Y);
+            double x = Math.Pow((b.X - a.X), 2);
+            double y = Math.Pow((b.Y - a.Y), 2);
+            return Math.Sqrt(x + y);
         }
 
         private class Punkt
         {
-            public double x { get; set; }
-            public double y { get; set; }
+            public double X { get; set; }
+            public double Y { get; set; }
         }
 
         private class TrojkaPunktow
         {
-            public Punkt punktPoprzedni { get; set; }
-            public Punkt punktSrodkowy { get; set; }
-            public Punkt punktNastepny { get; set; }
+            public Punkt PunktPoprzedni { get; set; }
+            public Punkt PunktSrodkowy { get; set; }
+            public Punkt PunktNastepny { get; set; }
         }
     }
 }
