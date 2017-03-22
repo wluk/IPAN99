@@ -15,18 +15,18 @@ namespace ConsoleApplication1
         {
             int[,] krzywa = new int[7, 2];         // tablica do przechowywania punktów
             Stopwatch timer = new Stopwatch(); // obiekt do sprawdzania czasu
-            krzywa[0, 0] = 0;  //x1
-            krzywa[0, 1] = 0;  //y1
-            krzywa[1, 0] = 1;  //x2
-            krzywa[1, 1] = 1;  //y2
-            krzywa[2, 0] = 2;  //x3
-            krzywa[2, 1] = 2;  //y3
-            krzywa[3, 0] = 3;     //x4
-            krzywa[3, 1] = 3;     //y4
-            krzywa[4, 0] = 4;     //x5
-            krzywa[4, 1] = 4;     //y5
-            krzywa[5, 0] = 5;     //x6
-            krzywa[5, 1] = 5;     //y6
+            krzywa[0, 0] = 0;   //x1
+            krzywa[0, 1] = 0;   //y1
+            krzywa[1, 0] = 1;   //x2
+            krzywa[1, 1] = 1;   //y2
+            krzywa[2, 0] = 2;   //x3
+            krzywa[2, 1] = 2;   //y3
+            krzywa[3, 0] = 3;   //x4
+            krzywa[3, 1] = 3;   //y4
+            krzywa[4, 0] = 4;   //x5
+            krzywa[4, 1] = 4;   //y5
+            krzywa[5, 0] = 5;   //x6
+            krzywa[5, 1] = 5;   //y6
             krzywa[6, 0] = 6;
             krzywa[6, 1] = 6;
 
