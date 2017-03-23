@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 
-namespace ConsoleApplication1
+namespace IPAN99
 {
     class Program
     {
@@ -61,7 +61,6 @@ namespace ConsoleApplication1
 
             Console.WriteLine("Czas obliczania: {0}ms", timer.ElapsedMilliseconds);
             Console.ReadKey();
-
         }
 
         /// <summary>
@@ -98,11 +97,7 @@ namespace ConsoleApplication1
                 });
             }
             //OBLICZENIE ILOŚCI DANYCH NA WĄTEK
-            int ilosc = trojkiPunktow.Count / liczbaWatkow;
-            if (trojkiPunktow.Count % 2 != 0)
-            {
-                ilosc += 1;
-            }
+            var ilosc = Math.Round((double)trojkiPunktow.Count / liczbaWatkow);
 
             //PRZYGOTOWANIE ZESTAWOW DANYCH DLA WĄTKÓW
             var zbiorZestawowWatka = new List<List<TrojkaPunktow>>();
@@ -127,7 +122,7 @@ namespace ConsoleApplication1
                   () =>
                   {
                       wszystkieAlfy.AddRange(ZadanieWatka(daneDlaWatka));
-                      
+
                   });
                 thread.IsBackground = true;
                 thread.Start();
@@ -139,7 +134,6 @@ namespace ConsoleApplication1
             foreach (var watek in wszystkieWatki)
             {
                 watek.Join();
-                //wszystkieAlfy.AddRange((List<double>)alfa);
             }
 
             Console.WriteLine(wszystkieAlfy.Max());
